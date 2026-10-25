@@ -114,6 +114,13 @@ If sign-in is requested again, native Emacs may have a different home from
 Termux; complete the agent's authentication flow in that environment.
 
 Agent-shell keeps its default appearance; desktop color styling is not copied.
+On Android, common agent UI arrows and status symbols display as ASCII to
+avoid missing-font boxes. This buffer-local fallback preserves the original
+text and folding behavior; it does not change colors or fonts.
+
+Native Android launches the adapter's `dist/index.js` with Termux's Node
+directly. This was tested on the tablet and avoids the npm launcher failure
+(exit code 127). It assumes the standard Termux global npm installation path.
 Agent-shell data is directed into ignored
 `var/agent-shell/`, separated by working directory. Codex manages its own
 credentials and session history outside this repo; never add them to Git.

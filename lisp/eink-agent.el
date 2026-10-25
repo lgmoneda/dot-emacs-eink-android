@@ -5,6 +5,28 @@
 (when (and (eq system-type 'android) (not (getenv "CODEX_PATH")))
   (setenv "CODEX_PATH" "/data/data/com.termux/files/usr/bin/codex"))
 
+;; Calling Node directly avoids the npm shebang launch failure on Android.
+(when (eq system-type 'android)
+  (setq agent-shell-openai-codex-acp-command
+        '("/data/data/com.termux/files/usr/bin/node"
+          "/data/data/com.termux/files/usr/lib/node_modules/@agentclientprotocol/codex-acp/dist/index.js")))
+
+(defun eink-agent-text-symbols ()
+  "Display agent UI symbols as ASCII in Android agent buffers.
+Buffer contents and folding properties stay intact."
+  (when (eq system-type 'android)
+    (setq-local buffer-display-table
+                (if buffer-display-table
+                    (copy-sequence buffer-display-table)
+                  (make-display-table)))
+    (dolist (pair '((?▶ . ">") (?▼ . "v") (?▸ . ">") (?▾ . "v")
+                    (?❯ . ">") (?➜ . ">") (?→ . "->")
+                    (?⚠ . "!") (?✶ . "*") (?💡 . "*")
+                    (?✓ . "+") (?✔ . "+") (?✗ . "x")))
+      (aset buffer-display-table (car pair) (vconcat (cdr pair))))))
+
+(add-hook 'agent-shell-mode-hook #'eink-agent-text-symbols)
+
 (defun eink-agent-data-directory (subdir)
   "Keep agent SUBDIR data in private state, separated by working directory."
   (expand-file-name
@@ -35,8 +57,15 @@
   (interactive)
   (unless (locate-library "agent-shell")
     (user-error "Run M-x eink-install-packages, then restart Emacs"))
-  (unless (executable-find "codex-acp")
-    (user-error "Install @agentclientprotocol/codex-acp in Termux first"))
+  (if (eq system-type 'android)
+      (progn
+        (unless (executable-find "/data/data/com.termux/files/usr/bin/node")
+          (user-error "Install nodejs-lts in Termux first"))
+        (unless (file-readable-p
+                 "/data/data/com.termux/files/usr/lib/node_modules/@agentclientprotocol/codex-acp/dist/index.js")
+          (user-error "Install @agentclientprotocol/codex-acp globally in Termux first")))
+    (unless (executable-find "codex-acp")
+      (user-error "Install @agentclientprotocol/codex-acp first")))
   (let ((codex (or (getenv "CODEX_PATH") "codex")))
     (unless (executable-find codex)
       (user-error "Codex executable not found: %s" codex)))
