@@ -13,12 +13,22 @@
     (concat "agent-shell/" (secure-hash 'sha256 (expand-file-name default-directory)) "/")
     eink-state-directory)))
 
-;; These take effect when agent-shell is first loaded; no agent starts at login.
-(setq agent-shell-header-style 'text
-      agent-shell-show-busy-indicator nil
-      agent-shell-show-config-icons nil
-      agent-shell-highlight-blocks nil
+;; Desktop behavior without its work credentials, extensions, or styling.
+(setq agent-shell-file-completion-enabled t
+      agent-shell-show-welcome-message nil
+      agent-shell-context-sources nil
       agent-shell-dot-subdir-function #'eink-agent-data-directory)
+
+(with-eval-after-load 'agent-shell
+  (setq agent-shell-openai-default-model-id "gpt-6.1-sol"
+        agent-shell-openai-default-session-mode-id "agent-full-access"
+        agent-shell-openai-authentication
+        (agent-shell-openai-make-authentication :login t)
+        agent-shell-agent-configs
+        (list (agent-shell-openai-make-codex-config))
+        agent-shell-openai-codex-environment
+        (agent-shell-make-environment-variables :inherit-env t))
+  (define-key agent-shell-mode-map (kbd "C-<tab>") #'eink-next-window))
 
 (defun eink-codex ()
   "Start a Codex agent-shell in the current directory."
@@ -33,7 +43,21 @@
   (require 'agent-shell)
   (call-interactively #'agent-shell-openai-start-codex))
 
-(global-set-key (kbd "C-c e") #'eink-codex)
+;; Match the desktop prefix and its core context/composition commands.
+(define-prefix-command 'eink-agent-map)
+(global-set-key (kbd "C-c a") #'eink-agent-map)
+(define-key eink-agent-map (kbd "a") #'eink-codex)
+(dolist (binding '(("f" . agent-shell-send-current-file)
+                   ("l" . agent-shell-send-dwim)
+                   ("d" . agent-shell-send-dwim)
+                   ("r" . agent-shell-send-region)
+                   ("o" . agent-shell-send-other-file)
+                   ("c" . agent-shell-prompt-compose)
+                   ("q" . agent-shell-prompt-queue)
+                   ("s" . agent-shell-send-screenshot)
+                   ("i" . agent-shell-send-clipboard-image)))
+  (autoload (cdr binding) "agent-shell" nil t)
+  (define-key eink-agent-map (kbd (car binding)) (cdr binding)))
 
 (provide 'eink-agent)
 ;;; eink-agent.el ends here

@@ -82,9 +82,30 @@ codex
 ```
 
 Complete Codex sign-in there. Back in Emacs, open your study directory or an
-Org note, then press `C-c e` (`M-x eink-codex`). The session starts in the
+Org note, then press `C-c a a` (`M-x eink-codex`). The session starts in the
 current directory. You can also use `M-x agent-shell-openai-start-codex`
-after agent-shell is loaded. No model or permission policy is forced.
+after agent-shell is loaded. Like the desktop config, it defaults to
+`gpt-6.1-sol`, login authentication, and `agent-full-access` mode (commands and
+file changes can run without approval). Only Codex appears in the agent menu.
+Override these defaults with `with-eval-after-load` in `local.el` if needed.
+
+The desktop `C-c a` prefix is preserved:
+
+| Keys | Action |
+| --- | --- |
+| `C-c a a` | Start Codex |
+| `C-c a f` | Send current file |
+| `C-c a r` | Send selected region |
+| `C-c a o` | Send another file |
+| `C-c a l`, `C-c a d` | Send context at point (DWIM) |
+| `C-c a c` | Compose a prompt |
+| `C-c a q` | Prompt queue |
+| `C-c a s`, `C-c a i` | Screenshot / clipboard image (needs device support) |
+
+File completion is enabled, the welcome message is hidden, and automatic
+context sources are disabled, as on the desktop. Context can still be sent
+explicitly with the keys above. Work profiles, Claude, voice transcription,
+pet, dashboard, Draw.io, Corfu, and Olivetti extensions are not included.
 
 On Android, the config sets `CODEX_PATH` to the Termux Codex executable unless
 you already set it. The adapter uses this instead of its bundled desktop
@@ -92,8 +113,8 @@ binary. This complements the Termux PATH setup in `early-init.el`.
 If sign-in is requested again, native Emacs may have a different home from
 Termux; complete the agent's authentication flow in that environment.
 
-The session uses a text header with no animated busy indicator or config
-icons. Responses still stream. Agent-shell data is directed into ignored
+Agent-shell keeps its default appearance; desktop color styling is not copied.
+Agent-shell data is directed into ignored
 `var/agent-shell/`, separated by working directory. Codex manages its own
 credentials and session history outside this repo; never add them to Git.
 No agent-shell extensions or PDF extraction tools are required for text chats.
