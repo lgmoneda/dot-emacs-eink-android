@@ -1,8 +1,8 @@
 # Emacs for a 10.3-inch black-and-white Android tablet
 
 A small first step toward editing Org, agenda files, and Org-roam notes.
-Requires Emacs 29.1 or newer. Uses the built-in Org version. Agenda paths,
-sync, capture templates, and Org-roam are intentionally left for the next step.
+Requires Emacs 29.1 or newer. Uses the built-in Org version. The personal agenda reads your synced TODO file.
+Capture templates and Org-roam are not configured yet.
 
 ## First launch
 
@@ -141,3 +141,46 @@ Customize writes to ignored `custom.el`. History, saved positions, recovery
 copies, and backups go in ignored `var/`; installed packages go in ignored
 `elpa/`. Keep personal Org files outside this public repository. Review
 `git status` and the exact diff before publishing any changes.
+
+## Personal Org agenda
+
+Copy the updated `init.el` and `lisp/` to your tablet config directory.
+Run `M-x eink-install-packages` once to install `org-super-agenda` and its
+dependencies, then restart Emacs. Press **F10**, **C-c o a**, or run
+`M-x eink-org-agenda`. `M-x org-agenda RET d` also opens the personal view.
+`C-c a` remains the agent-shell prefix.
+
+The source is the desktop's **active** `settings/org-custom-agenda-opt-settings.el`,
+loaded by `settings/org-settings.el`; the older `org-custom-agenda-settings.el`
+is commented out there. Desktop F10 and startup both open command `d`.
+The port keeps its deadlines, week schedule, and ordered groups: Family Epic,
+Tech Epic, Cult Journeys, Late tasks, Mobile inbox, Backlog, Season Goals,
+Family goals, and Backlog Projects. Items enter the first matching group;
+empty groups are hidden. TODO states, priorities A-F, inherited priorities,
+and the non-inherited `epic` tag follow the desktop settings.
+The week block retains the desktop's effective direct-parent `bulk` exclusion.
+Headings use plain separators and a `>` child marker for tablet font support.
+
+Only `todo.org` is included. The desktop also adds Org-roam files tagged
+`agenda`; those tasks will appear only when those files are synced and added
+here. Emacs opens the personal agenda as the only visible window after startup,
+using the device settings from `local.el`. If the file or package is missing,
+startup completes with a warning. To disable automatic opening, put
+`(setq eink-org-agenda-on-startup nil)` in `local.el`.
+Desktop window splitting and the work agenda are not included.
+
+The config uses `/storage/amulated/0/Documents/OrgSync/todo-files/todo.org`
+if that exact file is readable; otherwise it defaults to the usual Android
+path `/storage/emulated/0/Documents/OrgSync/todo-files/todo.org`.
+To select another path, put this in the tablet's ignored `local.el`:
+
+```elisp
+(setq eink-org-todo-file "/storage/emulated/0/Documents/OrgSync/todo-files/todo.org"
+      org-agenda-files (list eink-org-todo-file))
+```
+
+After sync updates the file, press `g` in the agenda to regenerate it.
+If Emacs already has an older copy open, revert that source buffer first
+(`M-x revert-buffer`; resolve any unsaved edits before reverting).
+Agenda generation does not save the source file. Standard Org commands can
+edit it, so save deliberately when using bidirectional sync.
