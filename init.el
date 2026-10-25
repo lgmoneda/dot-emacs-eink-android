@@ -19,7 +19,7 @@
 
 (defconst eink-packages
   '(vertico orderless consult marginalia embark avy expand-region
-    multiple-cursors goto-chg ace-window default-text-scale)
+    multiple-cursors goto-chg ace-window default-text-scale agent-shell)
   "Small desktop editing subset, installed only on explicit request.")
 
 (defun eink-install-packages ()
@@ -34,6 +34,7 @@
 (require 'eink-display)
 (require 'eink-editor)
 (require 'eink-productivity)
+(require 'eink-agent)
 
 ;; Private device paths and preferences belong in these ignored files.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))

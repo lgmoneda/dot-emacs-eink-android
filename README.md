@@ -61,9 +61,42 @@ indexing, or global file polling. Touch and the menu bar remain available.
 
 Most editing packages load on first use. The larger desktop setup—Straight,
 Smartparens, Anzu, Super-save, Writeroom, language servers, AI tools, and media
-packages—is omitted for this first trial. Standard Emacs undo and bracket
+packages—is omitted apart from the optional Codex session below. Standard Emacs undo and bracket
 commands remain available. Files are saved explicitly with `C-x C-s`;
 normal Emacs recovery auto-saves and versioned backups are enabled.
+
+## Codex in agent-shell
+
+Run `M-x eink-install-packages` again after pulling this update, then restart
+Emacs. It now includes `agent-shell`; package.el installs its dependencies.
+The package loads only when you start a session.
+
+The native Android Emacs app must already be able to launch Termux programs.
+Install the backend in Termux:
+
+```sh
+pkg update
+pkg install nodejs-lts npm codex git ripgrep
+npm install -g @agentclientprotocol/codex-acp
+codex
+```
+
+Complete Codex sign-in there. Back in Emacs, open your study directory or an
+Org note, then press `C-c e` (`M-x eink-codex`). The session starts in the
+current directory. You can also use `M-x agent-shell-openai-start-codex`
+after agent-shell is loaded. No model or permission policy is forced.
+
+On Android, the config sets `CODEX_PATH` to the Termux Codex executable unless
+you already set it. The adapter uses this instead of its bundled desktop
+binary. This complements the Termux PATH setup in `early-init.el`.
+If sign-in is requested again, native Emacs may have a different home from
+Termux; complete the agent's authentication flow in that environment.
+
+The session uses a text header with no animated busy indicator or config
+icons. Responses still stream. Agent-shell data is directed into ignored
+`var/agent-shell/`, separated by working directory. Codex manages its own
+credentials and session history outside this repo; never add them to Git.
+No agent-shell extensions or PDF extraction tools are required for text chats.
 
 ## Private device settings
 
