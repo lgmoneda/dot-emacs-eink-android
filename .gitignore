@@ -1,0 +1,18 @@
+# Device preferences and generated state must stay private.
+/local.el
+/custom.el
+/var/
+/elpa/
+/eln-cache/
+/auto-save-list/
+/.cache/
+/.emacs.desktop*
+/bookmarks
+/recentf
+/tramp
+/url/
+*.elc
+*~
+\#*\#
+.#*
+.DS_Store
