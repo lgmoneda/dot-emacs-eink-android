@@ -56,6 +56,8 @@ Consult file searches need the corresponding external program: `rg` for
 Black text on white; headings retain weight and links use underlines. Text
 starts at 16 pt without a device-specific font. Completion shows eight rows
 with a fixed height. Consult previews require `M-.` to reduce screen refreshes.
+The selected completion row uses white text on black. Matching text is
+underlined and follows the row's text color: white when selected, black otherwise.
 No blinking cursor, line numbers, child-frame completion, animation, background
 indexing, or global file polling. Touch and the menu bar remain available.
 

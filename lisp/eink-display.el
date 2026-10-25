@@ -39,6 +39,14 @@
                 font-lock-variable-name-face font-lock-warning-face))
   (custom-theme-set-faces
    'eink `(,face ((t (:foreground "black" :background unspecified))))))
+;; Match faces must not supply colors: Vertico adds its selected-row face
+;; underneath them. An unspecified underline color follows the text color.
+(dolist (face '(orderless-match-face-0 orderless-match-face-1
+                orderless-match-face-2 orderless-match-face-3
+                completions-common-part))
+  (custom-theme-set-faces
+   'eink `(,face ((t (:inherit nil :foreground unspecified
+                     :background unspecified :underline t))))))
 (enable-theme 'eink)
 
 (with-eval-after-load 'org
