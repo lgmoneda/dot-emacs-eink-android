@@ -169,14 +169,21 @@ startup completes with a warning. To disable automatic opening, put
 `(setq eink-org-agenda-on-startup nil)` in `local.el`.
 Desktop window splitting and the work agenda are not included.
 
-The agenda uses Android’s document-provider path:
-`/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/todo-files/todo.org`.
+The shared Org directory is `/storage/emulated/0/Documents/OrgSync/`.
+The agenda uses:
+`/storage/emulated/0/Documents/OrgSync/todo-files/todo.org`.
 To select another path, put this in the tablet's ignored `local.el`:
 
 ```elisp
-(setq eink-org-todo-file "/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/todo-files/todo.org"
+(setq org-directory "/storage/emulated/0/Documents/OrgSync/"
+      org-roam-directory (expand-file-name "roam" org-directory)
+      eink-org-todo-file (expand-file-name "todo-files/todo.org" org-directory)
       org-agenda-files (list eink-org-todo-file))
 ```
+
+`M-x lgm/open-mobile-inbox` opens `mobile/inbox.org` under `org-directory`.
+`M-x lgm/open-mobile-todo` opens `mobile/mobile-todo.org` there. Both commands
+move to the end of the file, as on the desktop.
 
 After sync updates the file, press `g` in the agenda to regenerate it.
 If Emacs already has an older copy open, revert that source buffer first
@@ -200,10 +207,10 @@ The tablet Emacs must have built-in SQLite support; check with
 | `C-c n l` | Toggle backlinks |
 | `C-c n s` | Refresh index after syncing |
 
-The notes folder is `/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/roam`.
+The notes folder is `/storage/emulated/0/Documents/OrgSync/roam`.
 Override it in `local.el`:
 ```elisp
-(setq org-roam-directory "/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/roam")
+(setq org-roam-directory (expand-file-name "roam" org-directory))
 ```
 
 The database stays in the tablet's ignored `var/org-roam.db`, outside the

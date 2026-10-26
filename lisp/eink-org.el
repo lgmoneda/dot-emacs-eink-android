@@ -4,11 +4,25 @@
 (require 'org)
 (require 'org-agenda)
 
+(setq org-directory "/storage/emulated/0/Documents/OrgSync/")
+
 (defgroup eink-org nil "Personal agenda on the tablet." :group 'org)
 (defcustom eink-org-todo-file
-  "/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/todo-files/todo.org"
+  (expand-file-name "todo-files/todo.org" org-directory)
   "Synced TODO file. Override in local.el if necessary."
   :type 'file :group 'eink-org)
+
+(defun lgm/open-mobile-inbox ()
+  "Open the synced mobile inbox Org file and go to the end."
+  (interactive)
+  (find-file (expand-file-name "mobile/inbox.org" org-directory))
+  (goto-char (point-max)))
+
+(defun lgm/open-mobile-todo ()
+  "Open the synced mobile TODO Org file and go to the end."
+  (interactive)
+  (find-file (expand-file-name "mobile/mobile-todo.org" org-directory))
+  (goto-char (point-max)))
 
 (setq org-agenda-files (list eink-org-todo-file)
       org-agenda-window-setup 'current-window)

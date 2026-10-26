@@ -8,7 +8,7 @@
 (defvar org-roam-completion-everywhere)
 
 (setq org-roam-directory
-      "/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/roam"
+      (expand-file-name "roam" org-directory)
       org-roam-db-location (expand-file-name "org-roam.db" eink-state-directory)
       org-roam-completion-everywhere nil
       org-roam-capture-templates
