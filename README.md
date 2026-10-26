@@ -194,8 +194,12 @@ edit it, so save deliberately when using bidirectional sync.
 ## Synced Org-roam notes
 
 Copy the updated `init.el` and `lisp/` to the tablet, run
-`M-x eink-install-packages`, then restart. Org-roam loads and builds its index
-on first use, keeping agenda startup light. The first scan can take time.
+`M-x eink-install-packages`, then restart. Use a recent Org-roam version that
+supports a function in `org-roam-node-display-template`.
+Org-roam loads on first use, keeping agenda startup light. Press `C-c n s`
+once to build the local index; this first scan can take time. Find, insert,
+capture, and backlinks then use that index without scanning the collection
+on first use after a restart. If no index exists, they ask you to build it.
 The tablet Emacs must have built-in SQLite support; check with
 `M-: (sqlite-available-p) RET` (the result must be `t`).
 
@@ -216,7 +220,12 @@ Override it in `local.el`:
 The database stays in the tablet's ignored `var/org-roam.db`, outside the
 synced folder. Notes use standard Org IDs; new notes get timestamp-and-title
 filenames. Finish capture with `C-c C-c`, or cancel with `C-c C-k`.
+Completion displays titles and aliases without annotations or Org-roam's
+recent-file sorting. A direct title formatter avoids per-node template
+expansion. Indexing uses a bounded 64 MiB garbage-collection threshold;
+override `org-roam-db-gc-threshold` in `local.el` if needed.
 After setup, saving notes in Emacs updates the index. After external sync,
 revert any stale source buffers and use `C-c n s` to index downloaded changes.
+Each `C-c n s` performs one full scan, including on first use.
 There is no background folder polling. This does not add roam notes to the
 agenda; the agenda still reads `todo.org`.
