@@ -176,7 +176,7 @@ To select another path, put this in the tablet's ignored `local.el`:
 
 ```elisp
 (setq org-directory "/storage/emulated/0/Documents/OrgSync/"
-      org-roam-directory (expand-file-name "roam" org-directory)
+      org-roam-directory (expand-file-name "roam/roam-boox" org-directory)
       eink-org-todo-file (expand-file-name "todo-files/todo.org" org-directory)
       org-agenda-files (list eink-org-todo-file))
 ```
@@ -211,13 +211,13 @@ The tablet Emacs must have built-in SQLite support; check with
 | `C-c n l` | Toggle backlinks |
 | `C-c n s` | Refresh index after syncing |
 
-The notes folder is `/storage/emulated/0/Documents/OrgSync/roam`.
+The editable BOOX notes folder is `/storage/emulated/0/Documents/OrgSync/roam/roam-boox`.
 Override it in `local.el`:
 ```elisp
-(setq org-roam-directory (expand-file-name "roam" org-directory))
+(setq org-roam-directory (expand-file-name "roam/roam-boox" org-directory))
 ```
 
-The database stays in the tablet's ignored `var/org-roam.db`, outside the
+The database stays in the tablet's ignored `var/org-roam-boox.db`, outside the
 synced folder. Notes use standard Org IDs; new notes get timestamp-and-title
 filenames. Finish capture with `C-c C-c`, or cancel with `C-c C-k`.
 Completion displays titles and aliases without annotations or Org-roam's
@@ -229,3 +229,72 @@ revert any stale source buffers and use `C-c n s` to index downloaded changes.
 Each `C-c n s` performs one full scan, including on first use.
 There is no background folder polling. This does not add roam notes to the
 agenda; the agenda still reads `todo.org`.
+
+
+## Desktop note library without tablet indexing
+
+Sync these desktop folders to the tablet:
+
+| Desktop Dropbox folder | Tablet folder under `OrgSync/` |
+| --- | --- |
+| `Agenda/roam/` | `roam/` (desktop library) |
+| `Agenda/roam/roam-boox/` (included above) | `roam/roam-boox/` (editable BOOX notes) |
+| `Agenda/desktop-org-roam-catalog/` | `desktop-org-roam-catalog/` |
+
+Keep `roam-boox/` inside the desktop-library sync tree. The desktop indexes
+all of `roam/`, while the tablet indexes only `roam/roam-boox/`. No separate
+sync pair is needed for BOOX notes.
+
+The BOOX notes have a separate database, `var/org-roam-boox.db`. The old
+`var/org-roam.db` is left untouched and is no longer used by this config.
+Remove any old `org-roam-directory` or `org-roam-db-location` override from
+`local.el` that still selects the desktop library. Use `C-c n s` to index
+only the small BOOX collection. The desktop library is never scanned by
+catalog search, insertion, or ID navigation.
+
+On the desktop, reload `settings/org-settings.el` (or restart Emacs), then run:
+
+```
+M-x lmoneda/org-roam-export-desktop-catalog
+```
+
+This exports the current desktop database to
+`~/Dropbox/Agenda/desktop-org-roam-catalog/catalog.json`. It includes indexed
+`.org` file nodes, heading nodes, titles, aliases, IDs, and relative paths;
+other file types and the editable `roam-boox/` subtree are excluded. It does
+not read note contents or scan the collection. Export again after adding,
+renaming, or moving notes. Use `C-u M-x lmoneda/org-roam-export-desktop-catalog`
+to synchronize the desktop index first, when necessary. Export is explicit,
+not automatic on every save.
+
+After Dropbox/OrgSync copies the export and notes, use these tablet commands:
+
+| Command | Keys | Action |
+| --- | --- | --- |
+| `desktop-roam-open-node` | `C-c d f` | Search node titles and aliases; jump to the ID |
+| `desktop-roam-open-file` | `M-x` | Search file-level titles and aliases |
+| `desktop-roam-insert-link` | `C-c d i` | Insert a standard `id:` link in a BOOX note |
+| `desktop-roam-reload-catalog` | `M-x` | Reload the catalog explicitly |
+
+The catalog is cached in memory and reloaded when the synced export changes.
+There is no directory walk or note parsing during search. Opening a node or
+following an `id:` link searches only the selected file for its ID, so
+heading navigation tolerates changed character positions. Standard `C-c C-o`
+works for desktop IDs even before loading Org-roam. Unrecognized IDs retain
+normal Org/BOOX behavior. Missing files or stale IDs report a sync error
+instead of starting a library scan.
+
+Desktop notes open read-only by default, including through ID links. Set
+`desktop-roam-read-only` to nil in `local.el` to allow editing. The library
+and catalog paths can also be overridden there:
+
+```elisp
+(setq desktop-roam-directory (expand-file-name "roam" org-directory)
+      desktop-roam-catalog-file
+      (expand-file-name "desktop-org-roam-catalog/catalog.json" org-directory))
+```
+
+Only standard `id:` links use the catalog. Absolute desktop `file:` links
+are not translated. This is a reading/search catalog, not a desktop
+backlink database on the tablet. Syncing relative images or attachments
+alongside the desktop library remains useful for reading them.

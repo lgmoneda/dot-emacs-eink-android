@@ -13,8 +13,8 @@
 (defvar org-roam-node-annotation-function)
 
 (setq org-roam-directory
-      (expand-file-name "roam" org-directory)
-      org-roam-db-location (expand-file-name "org-roam.db" eink-state-directory)
+      (expand-file-name "roam/roam-boox" org-directory)
+      org-roam-db-location (expand-file-name "org-roam-boox.db" eink-state-directory)
       org-roam-completion-everywhere nil
       org-roam-db-gc-threshold (* 64 1024 1024)
       org-roam-node-display-template #'org-roam-node-title

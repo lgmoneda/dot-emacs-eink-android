@@ -38,6 +38,7 @@
 (require 'eink-agent)
 (require 'eink-org)
 (require 'eink-roam)
+(require 'eink-desktop-roam)
 
 ;; Private device paths and preferences belong in these ignored files.
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
