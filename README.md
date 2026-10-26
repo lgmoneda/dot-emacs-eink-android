@@ -2,7 +2,7 @@
 
 A small first step toward editing Org, agenda files, and Org-roam notes.
 Requires Emacs 29.1 or newer. Uses the built-in Org version. The personal agenda reads your synced TODO file.
-Capture templates and Org-roam are not configured yet.
+Org-roam provides basic note finding, capture, links, and backlinks.
 
 ## First launch
 
@@ -169,13 +169,12 @@ startup completes with a warning. To disable automatic opening, put
 `(setq eink-org-agenda-on-startup nil)` in `local.el`.
 Desktop window splitting and the work agenda are not included.
 
-The config uses `/storage/amulated/0/Documents/OrgSync/todo-files/todo.org`
-if that exact file is readable; otherwise it defaults to the usual Android
-path `/storage/emulated/0/Documents/OrgSync/todo-files/todo.org`.
+The agenda uses Android’s document-provider path:
+`/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/todo-files/todo.org`.
 To select another path, put this in the tablet's ignored `local.el`:
 
 ```elisp
-(setq eink-org-todo-file "/storage/emulated/0/Documents/OrgSync/todo-files/todo.org"
+(setq eink-org-todo-file "/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/todo-files/todo.org"
       org-agenda-files (list eink-org-todo-file))
 ```
 
@@ -184,3 +183,33 @@ If Emacs already has an older copy open, revert that source buffer first
 (`M-x revert-buffer`; resolve any unsaved edits before reverting).
 Agenda generation does not save the source file. Standard Org commands can
 edit it, so save deliberately when using bidirectional sync.
+
+## Synced Org-roam notes
+
+Copy the updated `init.el` and `lisp/` to the tablet, run
+`M-x eink-install-packages`, then restart. Org-roam loads and builds its index
+on first use, keeping agenda startup light. The first scan can take time.
+The tablet Emacs must have built-in SQLite support; check with
+`M-: (sqlite-available-p) RET` (the result must be `t`).
+
+| Keys | Action |
+| --- | --- |
+| `C-c n f` | Find a note or create one |
+| `C-c n i` | Insert a note link |
+| `C-c n c` | Capture a note |
+| `C-c n l` | Toggle backlinks |
+| `C-c n s` | Refresh index after syncing |
+
+The notes folder is `/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/roam`.
+Override it in `local.el`:
+```elisp
+(setq org-roam-directory "/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/roam")
+```
+
+The database stays in the tablet's ignored `var/org-roam.db`, outside the
+synced folder. Notes use standard Org IDs; new notes get timestamp-and-title
+filenames. Finish capture with `C-c C-c`, or cancel with `C-c C-k`.
+After setup, saving notes in Emacs updates the index. After external sync,
+revert any stale source buffers and use `C-c n s` to index downloaded changes.
+There is no background folder polling. This does not add roam notes to the
+agenda; the agenda still reads `todo.org`.

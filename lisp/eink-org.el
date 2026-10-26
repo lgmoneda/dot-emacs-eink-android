@@ -6,9 +6,7 @@
 
 (defgroup eink-org nil "Personal agenda on the tablet." :group 'org)
 (defcustom eink-org-todo-file
-  (let ((reported "/storage/amulated/0/Documents/OrgSync/todo-files/todo.org")
-        (standard "/storage/emulated/0/Documents/OrgSync/todo-files/todo.org"))
-    (if (file-readable-p reported) reported standard))
+  "/content/storage/com.android.externalstorage.documents/primary:Documents/OrgSync/todo-files/todo.org"
   "Synced TODO file. Override in local.el if necessary."
   :type 'file :group 'eink-org)
 
