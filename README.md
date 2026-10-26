@@ -260,7 +260,7 @@ M-x lmoneda/org-roam-export-desktop-catalog
 
 This exports the current desktop database to
 `~/Dropbox/Agenda/desktop-org-roam-catalog/catalog.json`. It includes indexed
-`.org` file nodes, heading nodes, titles, aliases, IDs, and relative paths;
+`.org` file nodes, heading nodes, titles, aliases, IDs, citation associations, and relative paths;
 other file types and the editable `roam-boox/` subtree are excluded. It does
 not read note contents or scan the collection. Export again after adding,
 renaming, or moving notes. Use `C-u M-x lmoneda/org-roam-export-desktop-catalog`
@@ -298,3 +298,66 @@ Only standard `id:` links use the catalog. Absolute desktop `file:` links
 are not translated. This is a reading/search catalog, not a desktop
 backlink database on the tablet. Syncing relative images or attachments
 alongside the desktop library remains useful for reading them.
+
+
+## Research library and citations
+
+Sync `~/Dropbox/Research/` to
+`/storage/emulated/0/Documents/Research/`, preserving `library.bib` and the
+`Literature/` folder. Run `M-x eink-install-packages` after updating this
+config to install Citar, then restart Emacs. The bibliography is loaded
+only when you insert/follow a citation or browse it.
+
+| Command | Keys | Action |
+| --- | --- | --- |
+| `org-cite-insert` | `C-c r` in Org | Insert a citation such as `[cite:@zhang2021dive]` |
+| `eink-research-open` | `C-c n b` | Choose a reference, then its paper, notes, DOI, or URL |
+| `eink-research-create-note` | `M-x` | Create/resume an editable BOOX reading note |
+
+`C-c C-o` on an Org citation uses Citar to follow it. PDFs and EPUBs are
+handed to Android's external app chooser, where you can select your reader.
+Actual BOOX reader launching and saving annotations back to the synced PDF
+must be verified on the device.
+
+The associations come from these sources:
+
+- `library.bib` contains citation keys, bibliographic metadata, DOI/URL
+  links, and any explicit `file` fields.
+- A file named `Literature/<citekey>.pdf` is matched automatically. Explicit
+  relative `file` paths are resolved against `Literature/` and `Research/`.
+  Absolute Dropbox Research paths are translated to the tablet path.
+- Desktop note associations are stored in the note's `ROAM_REFS` property
+  (for example, `ROAM_REFS: cite:zhang2021dive`) and cached in the desktop
+  Org-roam database. The catalog now exports those
+  citation keys too; matching does not depend on the note's filename.
+- BOOX reading notes use `<citekey>.org` in `roam/roam-boox/`. They contain
+  a persistent Org ID and `ROAM_REFS: @<citekey>`, so the desktop also
+  recognizes their paper association after sync and indexing.
+
+The first catalog from before research support still works for
+citekey-named notes. To include timestamp-named or other desktop literature
+notes, run `M-x lmoneda/org-roam-export-desktop-catalog` with the updated
+desktop exporter and sync the regenerated `catalog.json`. The initial
+catalog has already been regenerated with these associations.
+
+Desktop notes stay read-only. Use `M-x eink-research-create-note` to write
+your own reading notes, even when a desktop note already exists for that
+paper. Only the BOOX note is indexed on creation; browsing citations does
+not load Org-roam or scan the desktop library. Resource indicators and
+recursive paper-folder searches are disabled to keep selection light.
+Citar lists filenames only in the small BOOX note folder and the configured
+Research/Literature folders; it does not parse desktop notes.
+
+Syncing a PDF does not by itself associate it with a reference. Papers with
+other filenames need a matching BibTeX `file` field or a citekey filename.
+Files in nested Research folders work through explicit `file` fields;
+they are not recursively discovered. No bibliography entries, PDFs, or
+existing notes are rewritten by this configuration.
+
+Override the two Research paths in `local.el` if necessary:
+
+```elisp
+(setq eink-research-directory "/storage/emulated/0/Documents/Research/"
+      eink-research-bibliography-file
+      (expand-file-name "library.bib" eink-research-directory))
+```
