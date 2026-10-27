@@ -13,5 +13,6 @@
 (add-to-list 'default-frame-alist '(foreground-color . "black"))
 (add-to-list 'default-frame-alist '(cursor-color . "black"))
 (add-to-list 'default-frame-alist '(tool-bar-lines . 0))
+(add-to-list 'default-frame-alist '(menu-bar-lines . 0))
 
 ;;; early-init.el ends here

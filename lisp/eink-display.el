@@ -9,9 +9,8 @@
       auto-window-vscroll nil
       mouse-wheel-progressive-speed nil
       use-dialog-box nil)
-(dolist (mode '(tool-bar-mode scroll-bar-mode blink-cursor-mode))
+(dolist (mode '(menu-bar-mode tool-bar-mode scroll-bar-mode blink-cursor-mode))
   (when (fboundp mode) (funcall mode -1)))
-;; Keep menus and touch input available for tablet use.
 (setq-default cursor-type 'box
               line-spacing 0
               indicate-empty-lines nil)
@@ -19,7 +18,7 @@
 (deftheme eink "Black and white, with no color-dependent syntax.")
 (custom-theme-set-faces
  'eink
- '(default ((t (:foreground "black" :background "white" :height 160))))
+ '(default ((t (:foreground "black" :background "white" :height 180))))
  '(cursor ((t (:background "black"))))
  '(region ((t (:foreground "white" :background "black"))))
  '(highlight ((t (:foreground "white" :background "black"))))

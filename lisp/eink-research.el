@@ -12,10 +12,13 @@
 (declare-function citar-select-ref "citar" (&rest args))
 (declare-function citar-create-note "citar" (key &optional entry))
 (declare-function citar-get-value "citar" (field key-or-entry))
+(declare-function citar-embark-mode "citar-embark" (&optional arg))
 (declare-function citar-file--parser-default "citar-file" (file-field))
 (declare-function citar-file--parser-triplet "citar-file" (file-field))
 (declare-function citar-file--get-notes "citar-file" (&optional keys))
 (declare-function eink-roam-setup "eink-roam" (&optional allow-missing-index))
+(declare-function org-roam-node-create "org-roam-node" (&rest args))
+(declare-function org-roam-capture- "org-roam-capture" (&rest args))
 
 (defgroup eink-research nil "Read papers and cite them in BOOX notes." :group 'org)
 (defcustom eink-research-directory "/storage/emulated/0/Documents/Research/"
@@ -27,6 +30,7 @@
   :type 'file)
 
 (defvar org-roam-directory)
+(defvar org-roam-capture-templates)
 (defvar citar-bibliography)
 (defvar citar-library-paths)
 (defvar citar-library-paths-recursive)
@@ -52,6 +56,8 @@
     (user-error "Run M-x eink-install-packages, then restart Emacs"))
   (require 'citar-org)
   (require 'citar-file)
+  (when (require 'citar-embark nil t)
+    (citar-embark-mode 1))
   (setq citar-bibliography (list eink-research-bibliography-file)
         org-cite-global-bibliography citar-bibliography
         citar-library-paths (list (expand-file-name "Literature" eink-research-directory)
@@ -163,16 +169,30 @@ never read.  Old catalogs also work for citekey-named file nodes."
   (make-directory org-roam-directory t)
   (eink-roam-setup t)
   (let ((file (expand-file-name (concat key ".org") org-roam-directory)))
-    (find-file file)
-    (unless (file-exists-p file)
-      (unless (= (buffer-size) 0)
-        (user-error "An unsaved note already exists for %s" key))
-      (insert (format ":PROPERTIES:\n:ID: %s\n:ROAM_REFS: @%s\n:END:\n#+title: %s\n#+filetags: :bibliographical_notes:\n\n[cite:@%s]\n\n* Reading notes\n"
-                      (org-id-new) key
-                      (replace-regexp-in-string "[\n\r]+" " "
-                                                (or (citar-get-value "title" entry) key))
-                      key))
-      (save-buffer))
+    (if (file-exists-p file)
+        (find-file file)
+      (when-let* ((buffer (get-file-buffer file)))
+        (with-current-buffer buffer
+          (unless (= (buffer-size) 0)
+            (user-error "An unsaved note already exists for %s" key))))
+      (let* ((template (copy-tree (assoc "r" org-roam-capture-templates)))
+             (title (or (citar-get-value "title" entry) key))
+             (author (or (citar-get-value "author" entry)
+                         (citar-get-value "editor" entry) ""))
+             (date (or (citar-get-value "date" entry)
+                       (citar-get-value "year" entry)
+                       (citar-get-value "issued" entry) "")))
+        (unless template (user-error "The Org-roam literature template r is missing"))
+        ;; Use the same template as the capture menu, then open the saved note
+        ;; for writing, as the existing Citar create-note command does.
+        (setcdr (nthcdr 3 template)
+                (plist-put (nthcdr 4 template) :immediate-finish t))
+        (org-roam-capture-
+         :keys "r" :templates (list template)
+         :node (org-roam-node-create :title title)
+         :info (list :citar-citekey key :citar-title title
+                     :citar-author author :citar-date date)
+         :props '(:finalize find-file))))
     (goto-char (point-max))))
 
 (define-key org-mode-map (kbd "C-c r") #'org-cite-insert)

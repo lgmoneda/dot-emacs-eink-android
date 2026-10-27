@@ -207,7 +207,7 @@ The tablet Emacs must have built-in SQLite support; check with
 | --- | --- |
 | `C-c n f` | Find a note or create one |
 | `C-c n i` | Insert a note link |
-| `C-c n c` | Capture a note |
+| `C-c n c` | Choose `d` default note or `r` literature note |
 | `C-c n l` | Toggle backlinks |
 | `C-c n s` | Refresh index after syncing |
 
@@ -425,3 +425,54 @@ Reopen an Org buffer (or run `M-x eink-org-reading-setup`) after changing
 reading typography settings. Use `C-c v h` then `C-c v i` after changing
 image limits. The actual font fallback and contrast still need to be checked
 on the BOOX screen.
+
+
+## Desktop capture templates and buffer shortcut
+
+In `C-c n b`, select an article and press `C-.` then `n` to run
+`citar-open-notes`, just like the desktop. Choose an existing desktop or BOOX
+note, or create a BOOX note with the literature template. Desktop notes come
+from the synced catalog; this does not index the desktop note collection.
+Run `M-x eink-install-packages` once to install the added `citar-embark`
+integration, then restart Emacs.
+
+The capture menu is `C-c c`, matching the desktop:
+
+| Keys | Capture destination |
+| --- | --- |
+| `C-c c n` | `roam/roam-boox/20261027052444-eink_fleeting_notes.org` |
+| `C-c c d` | `todo-files/todo.org`, under `Life` → `Misc` |
+| `C-c n c d` | New default BOOX Org-roam note |
+| `C-c n c r` | Select a bibliography entry and create/resume its BOOX note |
+
+Fleeting captures use the desktop's heading followed by an active date.
+Personal tasks use the desktop's `TODO` template, including selected text,
+and one blank line between entries. Finish ordinary captures with `C-c C-c`
+or abort with `C-c C-k`. Targets use `eink-fleeting-notes-file` and
+`eink-org-todo-file`, so `local.el` overrides apply when capturing.
+`C-c n` remains the Org-roam key prefix; the fleeting shortcut is `C-c c n`.
+
+The default Org-roam template copies the desktop's UTC timestamp/slug
+filename and this header:
+
+```org
+#+title: My note
+#+STARTUP: linkpreviews latexpreview
+#+filetags:
+```
+
+The desktop's default template body file is currently empty; the BOOX
+keeps an empty body with point ready for typing. Creating a new note through
+find/insert also uses this default template.
+
+The `r` literature template matches the desktop's title, year/date, author,
+`#+ref: cite:<key>`, STARTUP settings, bibliography tag, and creation time.
+It also includes `ROAM_REFS: @<key>` for durable Citar/Org-roam association.
+The Citar create-note action uses that same `r` template and opens the saved
+note for writing. Existing literature notes are opened without rewriting.
+All these notes stay under `roam/roam-boox/`. As before, the reading style
+prevents their STARTUP header from launching automatic image/LaTeX previews.
+
+`s-k` (Super/Cmd + K) now runs `kill-current-buffer`, as on the desktop,
+including the normal unsaved-change prompt. The initial font size is now
+18 points (previously 16) for better tablet visibility.

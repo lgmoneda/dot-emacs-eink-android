@@ -56,7 +56,7 @@
   "Open this configuration's init file."
   (interactive) (find-file (expand-file-name "init.el" eink-config-directory)))
 
-(dolist (binding '(("C-c w" . eink-copy-word) ("C-c l" . eink-copy-line)
+(dolist (binding '(("s-k" . kill-current-buffer) ("C-c w" . eink-copy-word) ("C-c l" . eink-copy-line)
                    ("C-c s" . eink-scratch) ("<C-return>" . eink-newline)
                    ("C-x 2" . eink-split-below) ("C-x 3" . eink-split-right)
                    ("C-<tab>" . eink-next-window) ("C-S-<tab>" . eink-previous-window)

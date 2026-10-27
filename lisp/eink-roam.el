@@ -2,6 +2,8 @@
 
 (require 'org)
 (require 'cl-lib)
+(declare-function eink-research-create-note "eink-research" ())
+(declare-function org-roam-capture "org-roam-capture" (&optional goto keys &rest args))
 
 (defvar org-roam-directory)
 (defvar org-roam-db-location)
@@ -21,9 +23,22 @@
       org-roam-node-default-sort nil
       org-roam-node-annotation-function nil
       org-roam-capture-templates
-      '(("d" "default" plain "%?"
-         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
-                            "#+title: ${title}\n")
+      `(("d" "default" plain "%?"
+         :target
+         (file+head "%(format-time-string \"%Y%m%d%H%M%S-${slug}.org\" (current-time) t)"
+                    ,(concat "#+title: ${title}\n"
+                             "#+STARTUP: linkpreviews latexpreview\n"
+                             "#+filetags: \n"))
+         :unnarrowed t)
+        ("r" "literature note" plain "%?"
+         :target
+         (file+head "${citar-citekey}.org"
+                    ,(concat ":PROPERTIES:\n:ROAM_REFS: @${citar-citekey}\n:END:\n"
+                             "#+title: ${citar-title} (${citar-date}), ${citar-author}.\n"
+                             "#+ref: cite:${citar-citekey}\n"
+                             "#+STARTUP: linkpreviews latexpreview\n"
+                             "#+filetags: :bibliographical_notes: \n"
+                             "#+created: %U\n\n"))
          :unnarrowed t)))
 
 (defun eink-roam-setup (&optional allow-missing-index)
@@ -48,19 +63,25 @@ Unless ALLOW-MISSING-INDEX is non-nil, require an existing local index."
   "Find an existing note or create one."
   (interactive)
   (eink-roam-setup)
-  (call-interactively #'org-roam-node-find))
+  (let ((org-roam-capture-templates
+         (list (assoc "d" org-roam-capture-templates))))
+    (call-interactively #'org-roam-node-find)))
 
 (defun eink-roam-insert ()
   "Insert an ID link to a note, creating the note if needed."
   (interactive)
   (eink-roam-setup)
-  (call-interactively #'org-roam-node-insert))
+  (let ((org-roam-capture-templates
+         (list (assoc "d" org-roam-capture-templates))))
+    (call-interactively #'org-roam-node-insert)))
 
 (defun eink-roam-capture ()
-  "Capture a note in the synced folder."
+  "Choose a default note or a bibliography-backed literature note."
   (interactive)
-  (eink-roam-setup)
-  (call-interactively #'org-roam-capture))
+  (pcase (read-char-choice "BOOX note: [d] default, [r] literature: " '(?d ?r))
+    (?d (eink-roam-setup)
+        (org-roam-capture nil "d"))
+    (?r (call-interactively #'eink-research-create-note))))
 
 (defun eink-roam-backlinks ()
   "Toggle the backlinks buffer for the current note."
