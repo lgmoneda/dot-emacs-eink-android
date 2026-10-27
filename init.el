@@ -20,7 +20,7 @@
 (defconst eink-packages
   '(vertico orderless consult marginalia embark avy expand-region
     multiple-cursors goto-chg ace-window default-text-scale agent-shell org-super-agenda
-    org-roam citar)
+    org-roam citar org-modern)
   "Small desktop editing subset, installed only on explicit request.")
 
 (defun eink-install-packages ()
@@ -37,6 +37,7 @@
 (require 'eink-productivity)
 (require 'eink-agent)
 (require 'eink-org)
+(require 'eink-org-reading)
 (require 'eink-roam)
 (require 'eink-desktop-roam)
 (require 'eink-research)

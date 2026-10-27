@@ -361,3 +361,67 @@ Override the two Research paths in `local.el` if necessary:
       eink-research-bibliography-file
       (expand-file-name "library.bib" eink-research-directory))
 ```
+
+## Org reading appearance
+
+![Org reading style preview in Emacs on macOS](docs/org-reading-preview.png)
+
+This is an Emacs preview on macOS, using the real Dom Casmurro note. It is
+not a screenshot from the BOOX.
+
+The tablet adapts the desktop's `aesthetics-settings.el`, `org-settings.el`,
+and Mindre typography: Iosevka, a large title, compact metadata, indented
+outlines, circle/diamond bullets, boxed tags, hidden emphasis markers, and
+`▼` folding indicators. Text and labels stay black on white. Tables and code
+retain a fixed-pitch font. Styling is buffer-local and does not change the
+agenda's layout or the Org file's contents.
+
+After copying the updated `init.el` and `lisp/`, run `M-x eink-install-packages`
+to install Org-modern. The other reading improvements also work without it.
+For the desktop font, copy the bundled `fonts/` folder alongside `init.el`,
+then run `M-x eink-install-reading-fonts` on the tablet and restart Emacs.
+The four compact Iosevka BOOX faces total about 1.8 MB; copying the desktop's
+large `.ttc` collection is unnecessary. Native Android Emacs discovers user
+fonts in `~/fonts/` at startup ([Emacs Android font documentation](https://www.gnu.org/software/emacs/manual/html_node/emacs/Android-Fonts.html)).
+If neither Iosevka BOOX nor Iosevka is available, the device font is retained.
+
+Notes open as folded outlines. Expand a heading with `TAB`; the metadata
+and emphasis markers remain in the underlying file. Keyword abbreviations
+reveal their original text when point is on them, so they remain editable.
+Active-line highlighting is disabled in Org buffers to reduce visual noise.
+The desktop theme's colors are replaced by weight, spacing and outlines.
+
+| Keys | Action |
+| --- | --- |
+| `C-c v i` | Show up to two local images from the expanded, visible text |
+| `C-u C-c v i` | Use the current subtree instead of the visible window |
+| `C-c v h` | Hide these previews and release their decoded image cache |
+
+Image previews are centered, capped at 750 pixels and the window width,
+and skip files above 8 MiB. They support local PNG, JPEG, GIF and WebP files
+when the Emacs build can decode them. Legacy image paths containing
+`Dropbox/Agenda/roam/` are resolved against `desktop-roam-directory` if their
+original location does not exist. Source links are not rewritten. Sync
+`roam/resources/` and other image folders with the desktop library.
+
+Desktop `#+STARTUP: inlineimages`, `linkpreviews`, and `latexpreview` settings
+are left in the file but do not trigger automatic previews while visiting
+notes on the tablet. Images are loaded only by explicit command, and there
+is no automatic LaTeX compilation. The image limit and file-size limit bound
+how much is requested; the decoder's memory usage still depends on the
+original image dimensions. No animations, file watchers or custom idle
+refresh jobs are added.
+
+Optional overrides in `local.el`:
+
+```elisp
+(setq eink-org-reading-line-spacing 0.12
+      eink-org-image-max-width 750
+      eink-org-image-limit 2
+      eink-org-image-max-bytes (* 8 1024 1024))
+```
+
+Reopen an Org buffer (or run `M-x eink-org-reading-setup`) after changing
+reading typography settings. Use `C-c v h` then `C-c v i` after changing
+image limits. The actual font fallback and contrast still need to be checked
+on the BOOX screen.
