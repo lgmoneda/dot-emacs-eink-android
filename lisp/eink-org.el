@@ -28,6 +28,11 @@ Insert after existing children.  Require a parent heading."
   "Synced TODO file. Override in local.el if necessary."
   :type 'file :group 'eink-org)
 
+(defcustom eink-org-work-todo-file
+  (expand-file-name "todo-files/nu.org" org-directory)
+  "Synced work TODO file. Override in local.el if necessary."
+  :type 'file :group 'eink-org)
+
 (defun lgm/open-mobile-inbox ()
   "Open the synced mobile inbox Org file and go to the end."
   (interactive)
@@ -270,6 +275,184 @@ Insert after existing children.  Require a parent heading."
          ((org-agenda-compact-blocks nil)))))
 
 
+(defun eink-org-skip-when-parent-scheduled ()
+  "Skip entries whose parent has a SCHEDULED property."
+  (save-restriction
+    (widen)
+    (let ((should-skip nil))
+      (save-excursion
+        (while (and (not should-skip) (org-up-heading-safe))
+          (when (org-get-scheduled-time (point))
+            (setq should-skip t))))
+      (when should-skip
+        (or (outline-next-heading) (point-max))))))
+
+(add-to-list 'org-agenda-custom-commands
+      '("nu" "Nubank Agenda"
+         (
+          ;; 📅 Deadlines
+          (tags-todo "+DEADLINE>=\"<-60d>\"|+perfcycle"
+                     ((org-agenda-overriding-header "📅 Deadlines\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺")
+                      (org-agenda-entry-types '(:deadline :scheduled))
+                      (org-agenda-sorting-strategy '(deadline-up))
+                      (org-agenda-prefix-format "%?-16 (eink/scheduled-or-not (org-entry-get (point) \"DEADLINE\")) ")
+                      (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                      (org-agenda-remove-tags t)))
+          ;; ⏳ Week Tasks
+          (agenda ""
+		    ((org-agenda-time-grid nil)
+		     (org-agenda-span 'week)
+		     (org-deadline-warning-days 0)
+		     (org-deadline-past-days 0)
+		     (org-scheduled-past-days 0)
+		     (org-agenda-entry-types '(:deadline :scheduled))
+		     (org-agenda-overriding-header "⏳ Week tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺")
+		     (org-agenda-scheduled-leaders '("" ""))
+		     (org-agenda-prefix-format "    %i %-4e %-10:c%(eink/org-has-children)")
+		     (org-agenda-remove-tags t)
+		     (org-agenda-skip-function '(eink/my-org-agenda-skip-if-parent-has-tag "bulk"))
+		     ;; (org-agenda-skip-function #'add-clock-emoji-to-agenda)
+		     ))
+          ;; 🧩 Grouped section — tags view but grouped
+          (tags "LEVEL>=1+TODO=\"TODO\"|+TODO=\"WAIT\""
+		((org-agenda-overriding-header "")
+		 (org-agenda-sorting-strategy '(priority-down))
+		 (org-agenda-skip-function #'eink-org-skip-when-parent-scheduled)
+		 (org-super-agenda-groups
+		  '(
+                    (:name "🌋 My Epics\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                           :and (:tag "epic"
+				      :tag "spinning"
+				      :not (:tag "team"))
+                           :transformer eink/org-agenda-remove-todo-keyword
+                           :order 0)
+
+                    (:name "📊 Team Epics\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                           :and (:tag "team" :tag "epic" :tag "spinning" :todo "TODO")
+                           :transformer eink/org-agenda-remove-todo-keyword
+                           :order 1)
+
+		    ;; --- Delegated (team+directreports OR delegated), TODO, not epic ---
+                    (:name "🤝 Delegated Tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                           :and (:not (:todo "DONE") :tag "delegated" :not (:tag "epic"))
+                           :order 2)
+
+                    (:name "⚡ High Priority Tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                           :and (:todo "TODO"
+                                 :priority "A"
+				 :scheduled nil
+				 :not (:tag "epic" :tag "delegated")
+				 )
+                           :and (:todo "TODO"
+                                 :priority "A"
+				 :scheduled past
+				 :not (:tag "epic" :tag "delegated")
+				 )
+			   :transformer eink/org-agenda-remove-todo-keyword
+			   :order 3)
+
+                    ;; --- Blocked/WAIT (exclude epics/team) ---
+                    (:name "💀 Blocked\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                           :and (:todo "WAIT"
+                                 :not (:tag "epic")
+                                 :not (:tag "team")
+				 :scheduled past
+				 )
+			   :and (:todo "WAIT"
+                                 :not (:tag "epic")
+                                 :not (:tag "team")
+				 :scheduled nil
+				 )
+                           :order 4)
+
+                    (:name "🚚 Batch Tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                           :and (:tag "batch"
+                                 :not (:tag "epic")
+                                 :not (:tag "delegated")
+				 :scheduled nil)
+                           :and (:tag "batch"
+                                 :not (:tag "epic")
+                                 :not (:tag "delegated")
+				 :scheduled past)
+                           :order 5)
+
+                    ;; --- Tasks in Projects — TODO, not A, UNSCHEDULED, not epic/delegated ---
+                    (:name "🚢 Tasks in Projects\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                           :and (:tag "projects"
+                                      :todo "TODO"
+                                      :not (:priority "A")
+                                      :scheduled nil
+                                      :not (:tag "epic")
+                                      :not (:tag "delegated"))
+                           :and (:tag "projects"
+                                      :todo "TODO"
+                                      :not (:priority "A")
+                                      :scheduled past
+                                      :not (:tag "epic")
+                                      :not (:tag "delegated"))
+			   :transformer eink/org-agenda-add-deadline-prefix
+                                    :order 6)
+
+                             ;; --- Tasks in Management — TODO, not A, UNSCHEDULED, not epic/delegated ---
+                             (:name "💼 Tasks in Management\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                                    :and (:todo "TODO"
+                                          :tag "manager"
+                                          :not (:priority "A")
+                                          :scheduled nil
+                                          :not (:tag "epic")
+                                          :not (:tag "cyclegoals")
+                                          :not (:tag "delegated"))
+                                    :and (:todo "TODO"
+                                          :tag "manager"
+                                          :not (:priority "A")
+                                          :scheduled past
+                                          :not (:tag "epic")
+                                          :not (:tag "cyclegoals")
+                                          :not (:tag "delegated"))
+				    :transformer eink/org-agenda-add-deadline-prefix
+                                    :order 7)
+
+                             ;; --- Education ---
+                             (:name "📚 Education\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                                    :and (:todo "TODO"
+                                          :tag "education"
+                                          :scheduled nil
+                                          :not (:tag "epic")
+                                          :not (:tag "cyclegoals")
+					  )
+                                    :and (:todo "TODO"
+                                          :tag "manager"
+                                          :scheduled past
+                                          :not (:tag "epic")
+                                          :not (:tag "cyclegoals")
+					  )
+
+                                    :order 8)
+
+			   ;; Season Goals
+			     (:name "🎯 Season Goals\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+				    :and (:tag "cyclegoals")
+				    :transformer eink/org-agenda-clean-item
+				    :order 9
+				    )
+
+			     ;; --- Late (exclude epics/team) ---
+			     (:name "💀 Late, untracked or backlog \n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+				    :and (:todo "TODO"
+					  :scheduled past
+					  )
+				    :and (:todo "TODO"
+					  :scheduled nil
+					  )
+				    :order 10)
+
+		  ;; Discard everything else
+		  (:discard (:anything t))
+		  ))))
+	  )
+         ((org-agenda-compact-blocks nil))))
+
+
 ;; org-settings.el also enables priority inheritance on the desktop.
 (defun eink-org-inherited-priority (heading)
   "Return the priority of HEADING or its nearest ancestor with a priority."
@@ -282,19 +465,35 @@ Insert after existing children.  Require a parent heading."
    (t (eink-org-inherited-priority (org-get-heading)))))
 (setq org-priority-get-priority-function #'eink-org-inherited-priority)
 
-(defun eink-org-agenda ()
-  "Open the desktop personal agenda using the synced TODO file."
-  (interactive)
-  (unless (file-readable-p eink-org-todo-file)
-    (user-error "Cannot read %s; set eink-org-todo-file in local.el" eink-org-todo-file))
+(defun eink-org--agenda-view (key file)
+  "Open agenda KEY for FILE as the only window in the current frame."
+  (unless (file-readable-p file)
+    (user-error "Cannot read synced agenda file: %s" file))
   (unless (require 'org-super-agenda nil t)
     (user-error "Run M-x eink-install-packages, then restart Emacs"))
   (org-super-agenda-mode 1)
-  (setq org-agenda-files (list eink-org-todo-file))
-  (org-agenda nil "d"))
+  ;; Keep the selected source for agenda refresh commands, too.
+  (setq org-agenda-files (list file))
+  (let ((org-agenda-window-setup 'current-window)
+        (display-buffer-alist nil)
+        (display-buffer-overriding-action '(display-buffer-same-window)))
+    (org-agenda nil key)
+    (delete-other-windows)))
 
-(global-set-key (kbd "<f10>") #'eink-org-agenda)
-(global-set-key (kbd "C-c o a") #'eink-org-agenda)
+(defun personal-agenda-view ()
+  "Show the desktop personal agenda from the synced todo.org file."
+  (interactive)
+  (eink-org--agenda-view "d" eink-org-todo-file))
+
+(defun work-agenda-view ()
+  "Show the desktop work agenda from the synced nu.org file."
+  (interactive)
+  (eink-org--agenda-view "nu" eink-org-work-todo-file))
+
+(defalias 'eink-org-agenda #'personal-agenda-view)
+(global-set-key (kbd "<f7>") #'work-agenda-view)
+(global-set-key (kbd "<f10>") #'personal-agenda-view)
+(global-set-key (kbd "C-c o a") #'personal-agenda-view)
 
 (defcustom eink-org-agenda-on-startup t
   "Open the personal agenda after startup."

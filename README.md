@@ -142,12 +142,15 @@ copies, and backups go in ignored `var/`; installed packages go in ignored
 `elpa/`. Keep personal Org files outside this public repository. Review
 `git status` and the exact diff before publishing any changes.
 
-## Personal Org agenda
+## Personal and work Org agendas
 
 Copy the updated `init.el` and `lisp/` to your tablet config directory.
 Run `M-x eink-install-packages` once to install `org-super-agenda` and its
 dependencies, then restart Emacs. Press **F10**, **C-c o a**, or run
-`M-x eink-org-agenda`. `M-x org-agenda RET d` also opens the personal view.
+`M-x personal-agenda-view` for the personal view (`eink-org-agenda` remains
+an alias). Press **F7** or run `M-x work-agenda-view` for the work view.
+Both commands show the agenda as the only window in the current frame.
+Other buffers remain available for switching back to your notes.
 `C-c a` remains the agent-shell prefix.
 
 The source is the desktop's **active** `settings/org-custom-agenda-opt-settings.el`,
@@ -161,13 +164,19 @@ and the non-inherited `epic` tag follow the desktop settings.
 The week block retains the desktop's effective direct-parent `bulk` exclusion.
 Headings use plain separators and a `>` child marker for tablet font support.
 
-Only `todo.org` is included. The desktop also adds Org-roam files tagged
+The personal view reads only `todo-files/todo.org`; the work view reads only
+`todo-files/nu.org`. Switching views also selects that file for agenda refresh.
+The work view copies desktop command `nu`: deadlines, week tasks, My Epics,
+Team Epics, Delegated Tasks, High Priority Tasks, Blocked, Batch Tasks,
+Tasks in Projects, Tasks in Management, Education, Season Goals, and
+Late/untracked/backlog. It retains the exclusion of tasks under scheduled
+ancestors from the grouped block.
+The desktop also adds Org-roam files tagged
 `agenda`; those tasks will appear only when those files are synced and added
 here. Emacs opens the personal agenda as the only visible window after startup,
 using the device settings from `local.el`. If the file or package is missing,
 startup completes with a warning. To disable automatic opening, put
 `(setq eink-org-agenda-on-startup nil)` in `local.el`.
-Desktop window splitting and the work agenda are not included.
 
 The shared Org directory is `/storage/emulated/0/Documents/OrgSync/`.
 The agenda uses:
@@ -178,6 +187,7 @@ To select another path, put this in the tablet's ignored `local.el`:
 (setq org-directory "/storage/emulated/0/Documents/OrgSync/"
       org-roam-directory (expand-file-name "roam/roam-boox" org-directory)
       eink-org-todo-file (expand-file-name "todo-files/todo.org" org-directory)
+      eink-org-work-todo-file (expand-file-name "todo-files/nu.org" org-directory)
       org-agenda-files (list eink-org-todo-file))
 ```
 
@@ -228,7 +238,7 @@ After setup, saving notes in Emacs updates the index. After external sync,
 revert any stale source buffers and use `C-c n s` to index downloaded changes.
 Each `C-c n s` performs one full scan, including on first use.
 There is no background folder polling. This does not add roam notes to the
-agenda; the agenda still reads `todo.org`.
+agenda; personal and work agendas read their respective TODO files.
 
 
 ## Desktop note library without tablet indexing
