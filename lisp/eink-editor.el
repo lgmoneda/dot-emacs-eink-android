@@ -20,6 +20,7 @@
 (savehist-mode 1)
 (save-place-mode 1)
 (delete-selection-mode 1)
+(transient-mark-mode 1)
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
 (add-hook 'text-mode-hook #'visual-line-mode)
@@ -55,6 +56,25 @@
 (defun eink-open-init ()
   "Open this configuration's init file."
   (interactive) (find-file (expand-file-name "init.el" eink-config-directory)))
+
+(defun pull-eink-repo ()
+  "Pull configuration updates asynchronously and show Git output.
+Use a fast-forward pull in `eink-config-directory'. Restart Emacs after
+a successful update to load the new configuration."
+  (interactive)
+  (require 'compile)
+  (let ((default-directory (file-name-as-directory eink-config-directory))
+        (git (executable-find "git"))
+        (buffer (get-buffer "*eink-repo-update*")))
+    (unless git
+      (user-error "Git is unavailable; install it in Termux with pkg install git"))
+    (unless (file-exists-p (expand-file-name ".git" default-directory))
+      (user-error "Config directory is not a Git checkout: %s" default-directory))
+    (when (and buffer (process-live-p (get-buffer-process buffer)))
+      (user-error "A configuration update is already running"))
+    (compilation-start
+     (concat (shell-quote-argument git) " pull --ff-only")
+     'compilation-mode (lambda (_) "*eink-repo-update*"))))
 
 (dolist (binding '(("s-k" . kill-current-buffer) ("C-c w" . eink-copy-word) ("C-c l" . eink-copy-line)
                    ("C-c s" . eink-scratch) ("<C-return>" . eink-newline)

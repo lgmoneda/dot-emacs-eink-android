@@ -292,7 +292,7 @@ Insert after existing children.  Require a parent heading."
          (
           ;; 📅 Deadlines
           (tags-todo "+DEADLINE>=\"<-60d>\"|+perfcycle"
-                     ((org-agenda-overriding-header "📅 Deadlines\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺")
+                     ((org-agenda-overriding-header "📅 Deadlines\n----------------------------------")
                       (org-agenda-entry-types '(:deadline :scheduled))
                       (org-agenda-sorting-strategy '(deadline-up))
                       (org-agenda-prefix-format "%?-16 (eink/scheduled-or-not (org-entry-get (point) \"DEADLINE\")) ")
@@ -306,7 +306,7 @@ Insert after existing children.  Require a parent heading."
 		     (org-deadline-past-days 0)
 		     (org-scheduled-past-days 0)
 		     (org-agenda-entry-types '(:deadline :scheduled))
-		     (org-agenda-overriding-header "⏳ Week tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺")
+		     (org-agenda-overriding-header "⏳ Week tasks\n----------------------------------")
 		     (org-agenda-scheduled-leaders '("" ""))
 		     (org-agenda-prefix-format "    %i %-4e %-10:c%(eink/org-has-children)")
 		     (org-agenda-remove-tags t)
@@ -320,24 +320,24 @@ Insert after existing children.  Require a parent heading."
 		 (org-agenda-skip-function #'eink-org-skip-when-parent-scheduled)
 		 (org-super-agenda-groups
 		  '(
-                    (:name "🌋 My Epics\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                    (:name "🌋 My Epics\n----------------------------------"
                            :and (:tag "epic"
 				      :tag "spinning"
 				      :not (:tag "team"))
                            :transformer eink/org-agenda-remove-todo-keyword
                            :order 0)
 
-                    (:name "📊 Team Epics\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                    (:name "📊 Team Epics\n----------------------------------"
                            :and (:tag "team" :tag "epic" :tag "spinning" :todo "TODO")
                            :transformer eink/org-agenda-remove-todo-keyword
                            :order 1)
 
 		    ;; --- Delegated (team+directreports OR delegated), TODO, not epic ---
-                    (:name "🤝 Delegated Tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                    (:name "🤝 Delegated Tasks\n----------------------------------"
                            :and (:not (:todo "DONE") :tag "delegated" :not (:tag "epic"))
                            :order 2)
 
-                    (:name "⚡ High Priority Tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                    (:name "⚡ High Priority Tasks\n----------------------------------"
                            :and (:todo "TODO"
                                  :priority "A"
 				 :scheduled nil
@@ -352,7 +352,7 @@ Insert after existing children.  Require a parent heading."
 			   :order 3)
 
                     ;; --- Blocked/WAIT (exclude epics/team) ---
-                    (:name "💀 Blocked\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                    (:name "💀 Blocked\n----------------------------------"
                            :and (:todo "WAIT"
                                  :not (:tag "epic")
                                  :not (:tag "team")
@@ -365,7 +365,7 @@ Insert after existing children.  Require a parent heading."
 				 )
                            :order 4)
 
-                    (:name "🚚 Batch Tasks\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                    (:name "🚚 Batch Tasks\n----------------------------------"
                            :and (:tag "batch"
                                  :not (:tag "epic")
                                  :not (:tag "delegated")
@@ -377,7 +377,7 @@ Insert after existing children.  Require a parent heading."
                            :order 5)
 
                     ;; --- Tasks in Projects — TODO, not A, UNSCHEDULED, not epic/delegated ---
-                    (:name "🚢 Tasks in Projects\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                    (:name "🚢 Tasks in Projects\n----------------------------------"
                            :and (:tag "projects"
                                       :todo "TODO"
                                       :not (:priority "A")
@@ -394,7 +394,7 @@ Insert after existing children.  Require a parent heading."
                                     :order 6)
 
                              ;; --- Tasks in Management — TODO, not A, UNSCHEDULED, not epic/delegated ---
-                             (:name "💼 Tasks in Management\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                             (:name "💼 Tasks in Management\n----------------------------------"
                                     :and (:todo "TODO"
                                           :tag "manager"
                                           :not (:priority "A")
@@ -413,7 +413,7 @@ Insert after existing children.  Require a parent heading."
                                     :order 7)
 
                              ;; --- Education ---
-                             (:name "📚 Education\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+                             (:name "📚 Education\n----------------------------------"
                                     :and (:todo "TODO"
                                           :tag "education"
                                           :scheduled nil
@@ -430,14 +430,14 @@ Insert after existing children.  Require a parent heading."
                                     :order 8)
 
 			   ;; Season Goals
-			     (:name "🎯 Season Goals\n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+			     (:name "🎯 Season Goals\n----------------------------------"
 				    :and (:tag "cyclegoals")
 				    :transformer eink/org-agenda-clean-item
 				    :order 9
 				    )
 
 			     ;; --- Late (exclude epics/team) ---
-			     (:name "💀 Late, untracked or backlog \n⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺⎺"
+			     (:name "💀 Late, untracked or backlog \n----------------------------------"
 				    :and (:todo "TODO"
 					  :scheduled past
 					  )

@@ -144,6 +144,11 @@ copies, and backups go in ignored `var/`; installed packages go in ignored
 
 ## Personal and work Org agendas
 
+To update the tablet configuration, run `M-x pull-eink-repo` from any buffer.
+It runs `git pull --ff-only` in the configuration repository without blocking
+Emacs and shows progress or errors in `*eink-repo-update*`. Restart Emacs
+after a successful update. Diverged branches are reported instead of merged.
+
 Copy the updated `init.el` and `lisp/` to your tablet config directory.
 Run `M-x eink-install-packages` once to install `org-super-agenda` and its
 dependencies, then restart Emacs. Press **F10**, **C-c o a**, or run
