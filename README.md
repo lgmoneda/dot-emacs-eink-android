@@ -429,6 +429,17 @@ on the BOOX screen.
 
 ## Desktop capture templates and buffer shortcut
 
+Org heading insertion has explicit Return bindings and prefix alternatives:
+
+| Keys | Action |
+| --- | --- |
+| `C-Return` or `C-c o n` | Insert a sibling heading after the current subtree |
+| `C-M-Return` or `C-c o c` | Append a child heading after existing children |
+
+These commands preserve the current heading and its body. Child insertion
+requires an existing parent heading. If Android intercepts modified Return,
+use the prefix alternative. For a new plain-list bullet, use `M-RET`.
+
 In `C-c n b`, select an article and press `C-.` then `n` to run
 `citar-open-notes`, just like the desktop. Choose an existing desktop or BOOX
 note, or create a BOOX note with the literature template. Desktop notes come

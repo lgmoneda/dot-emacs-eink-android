@@ -4,6 +4,22 @@
 (require 'org)
 (require 'org-agenda)
 
+(defun eink-org-insert-child-heading ()
+  "Append a child heading without splitting the current heading or body.
+Insert after existing children.  Require a parent heading."
+  (interactive)
+  (when (org-before-first-heading-p)
+    (user-error "Move to a parent heading or its body first"))
+  (let ((org-insert-heading-respect-content t))
+    (org-insert-subheading nil)))
+
+;; Cover both GUI Return events and their control-character spelling.
+;; Prefix alternatives also work when Android intercepts modified Return.
+(dolist (key '("C-<return>" "C-RET" "C-c o n"))
+  (define-key org-mode-map (kbd key) #'org-insert-heading-respect-content))
+(dolist (key '("C-M-<return>" "C-M-RET" "C-c o c"))
+  (define-key org-mode-map (kbd key) #'eink-org-insert-child-heading))
+
 (setq org-directory "/storage/emulated/0/Documents/OrgSync/")
 
 (defgroup eink-org nil "Personal agenda on the tablet." :group 'org)
